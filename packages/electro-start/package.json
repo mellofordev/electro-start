@@ -1,8 +1,35 @@
 {
   "name": "electro-start",
-  "version": "0.0.1",
-  "private": true,
+  "version": "0.0.1-alpha.0",
+  "description": "Main-process RPC framework for Electrobun + Vite + React desktop apps",
   "type": "module",
+  "license": "MIT",
+  "author": "mellofordev",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mellofordev/electro-start.git",
+    "directory": "packages/electro-start"
+  },
+  "homepage": "https://github.com/mellofordev/electro-start#readme",
+  "bugs": {
+    "url": "https://github.com/mellofordev/electro-start/issues"
+  },
+  "keywords": [
+    "electrobun",
+    "desktop",
+    "bun",
+    "rpc",
+    "react",
+    "vite"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "tag": "alpha"
+  },
+  "files": [
+    "src",
+    "LICENSE"
+  ],
   "exports": {
     ".": "./src/index.ts",
     "./bun-plugin": "./src/bun-plugin.ts",
@@ -12,14 +39,17 @@
     "./query": "./src/query/index.ts"
   },
   "scripts": {
-    "typecheck": "tsc -p tsconfig.json"
+    "typecheck": "tsc -p tsconfig.json",
+    "prepack": "cp ../../LICENSE ."
   },
   "peerDependencies": {
     "electrobun": "*",
     "@tanstack/react-query": ">=5"
   },
   "peerDependenciesMeta": {
-    "@tanstack/react-query": { "optional": true }
+    "@tanstack/react-query": {
+      "optional": true
+    }
   },
   "dependencies": {
     "superjson": "^2.2.0"

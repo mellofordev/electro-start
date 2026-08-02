@@ -1,29 +1,63 @@
 # electro-start
 
-A meta-framework for building desktop apps with [Electrobun](https://blackboard.sh/electrobun/) + Vite + React — the DX of Next.js / TanStack Start, for the desktop.
+Build desktop apps with [Electrobun](https://blackboard.sh/electrobun/), Vite, and React — with the same feel as Next.js / TanStack Start server functions, but the “server” is your Bun main process.
 
-## Create a project
+Call Bun from the UI like a normal async function. Full access to `bun:sqlite`, the filesystem, secrets, and native APIs — without hand-writing RPC.
+
+## Requirements
+
+- [Bun](https://bun.sh) 1.1+
+- macOS, Linux, or Windows (Electrobun)
+
+## Create an app
 
 ```bash
-bunx create-electro-start my-app
+bunx create-electro-start@alpha my-app --yes
 cd my-app
+bun install
 bun run dev
 ```
 
-From this monorepo (before packages are published), use the local CLI:
+That opens a desktop window with Vite HMR. First Electrobun run may download native binaries (~30MB).
+
+### Interactive setup
 
 ```bash
-bun packages/create-electro-start/src/index.ts my-app --local
-cd my-app
-bun run dev
+bunx create-electro-start@alpha
 ```
 
-See [`packages/create-electro-start`](packages/create-electro-start) for flags (`--skip-install`, `--force`, `--name`).
+You’ll be asked for a project name (created in the current directory).
 
-The core idea is **main fns**: like server functions, but the "server" is the Bun main process. Define a function once, import it from your UI, and call it like a local async function — it always executes in the main process, with full access to Bun APIs (`bun:sqlite`, `Bun.file`, the filesystem, secrets).
+### Useful flags
+
+| Flag | Description |
+| --- | --- |
+| `--yes` / `-y` | Non-interactive (pass a directory) |
+| `--template <id>` | Template (default: `basic`) |
+| `--name <name>` | App / window title |
+| `--skip-install` | Scaffold only; skip `bun install` |
+| `--force` | Allow a non-empty directory |
+
+## Project layout
+
+```
+my-app/
+├── electrobun.config.ts
+├── vite.config.ts
+└── src/
+    ├── main.ts          # Bun entry — startApp()
+    ├── main.tsx         # React entry
+    ├── app/             # routes (TanStack Router)
+    ├── actions/         # createMainFn (runs in Bun)
+    └── components/      # UI (shadcn)
+```
+
+## Main fns
+
+Define a function once in `src/actions`. Import it from React — it always runs in Bun.
 
 ```ts
-// src/actions/todos.ts — Bun main-process RPC
+// src/actions/todos.ts
 import { createMainFn } from "electro-start";
 
 export const listTodos = createMainFn().handler(async () => {
@@ -33,108 +67,60 @@ export const listTodos = createMainFn().handler(async () => {
 export const addTodo = createMainFn()
   .validator((title: string) => title.trim())
   .handler(async ({ data: title }) => {
-    return db.query("insert into todos (title) values (?) returning *").get(title);
+    return db
+      .query("insert into todos (title) values (?) returning *")
+      .get(title);
   });
 ```
 
 ```tsx
-// src/app/todos.tsx — route UI in the webview
+// src/app/todos.tsx
 import { addTodo, listTodos } from "@/actions/todos";
 
-const todos = await listTodos();                    // result inferred
-const todo = await addTodo({ data: "Buy milk" });  // input + result inferred
+const todos = await listTodos();
+await addTodo({ data: "Buy milk" });
 ```
 
-## How it works
+Under the hood:
 
-- **`electro-start`** (shared) — `createMainFn().validator().handler()` infers input and output types. No manual RPC ids or return type annotations.
-- **`@electro-start/vite-plugin`** — detects main-fn builder chains in any module and compiles that module to pure webview stubs (parsed with [oxc](https://oxc.rs)). Implementations and Bun-only imports never ship to the browser.
-- **`electro-start/runtime`** (Bun process) — `startApp()` discovers main-fn modules, registers their implementations, opens the window, wires one generic RPC method, and auto-detects the Vite dev server for HMR.
-- **`electro-start/client`** (webview) — `initElectroStart()` boots the bridge; stubs serialize args with [superjson](https://github.com/flightcontrolhq/superjson), so `Date`, `Map`, `Set`, `BigInt`, `undefined` all survive the round trip.
-- **`electro-start/query`** — optional TanStack Query helpers (`mainFnQueryOptions`, `mainFnMutationOptions`).
+1. **Vite plugin** — turns action modules into thin client stubs for the webview  
+2. **Bun plugin / runtime** — registers the real implementations and serves RPC  
+3. **superjson** — rich types (`Date`, `Map`, …) round-trip cleanly  
 
-Errors thrown in a main fn arrive in the webview as `MainFnError` with `name`, `message`, the main-process stack, and an optional structured `data` payload.
+## Scripts
 
-## Project structure
-
-```
-my-app/
-├── electrobun.config.ts
-├── vite.config.ts
-└── src/
-    ├── main.ts             # Bun entry: startApp()
-    ├── main.tsx            # React entry + RouterProvider
-    ├── app/                # file-based routes (Expo-style, no nested routes/)
-    ├── actions/            # createMainFn RPC (Bun)
-    ├── components/         # UI components
-    └── lib/
-```
-
-Templates are maintained under `examples/` (default: `basic`) and consumed by `create-electro-start`.
-
-Main process entry:
-
-```ts
-import { startApp } from "electro-start/runtime";
-
-await startApp({
-  window: { title: "My App", frame: { width: 900, height: 700 } },
-  devServer: { port: 5173 }, // HMR when the vite dev server is running
-});
-```
-
-Electrobun build config:
-
-```ts
-import type { ElectrobunConfig } from "electrobun";
-import { electroStartBun } from "electro-start/bun-plugin";
-
-export default {
-  build: {
-    bun: {
-      entrypoint: "src/main.ts",
-      // Launcher loads app/bun/index.js (not main.js).
-      naming: "index.js",
-      plugins: [electroStartBun()],
-    },
-    copy: {
-      "dist/index.html": "views/app/index.html",
-      "dist/assets": "views/app/assets",
-    },
-  },
-} satisfies ElectrobunConfig;
-```
-
-The Bun plugin discovers `<cwd>/src/actions` by default, injects stable ids,
-and bundles the implementations into packaged apps. `startApp()` also scans
-that root when running directly without a build. Keep the Vite plugin’s
-`electroStart({ root: "src/actions" })` in sync so client stub ids match.
-
-Webview entry:
-
-```tsx
-import { initElectroStart } from "electro-start/client";
-initElectroStart();
-```
-
-## Monorepo
-
-| package | description |
+| Command | Description |
 | --- | --- |
-| [`packages/electro-start`](packages/electro-start) | core: createMainFn, runtime, client, query helpers |
-| [`packages/vite-plugin`](packages/vite-plugin) | strips main-fn modules from the webview bundle |
-| [`packages/create-electro-start`](packages/create-electro-start) | CLI: `bunx create-electro-start` project scaffold |
-| [`examples/basic`](examples/basic) | default starter: Expo-style src layout + todos actions |
+| `bun run dev` | Vite HMR + Electrobun (default) |
+| `bun run start` | Production-like build, no Vite server |
+| `bun run typecheck` | TypeScript check |
 
-## Development
+## Packages
+
+| Package | Role |
+| --- | --- |
+| [`electro-start`](packages/electro-start) | `createMainFn`, runtime, client |
+| [`@electro-start/vite-plugin`](packages/vite-plugin) | Webview transform |
+| [`create-electro-start`](packages/create-electro-start) | Project CLI |
+| [`examples/basic`](examples/basic) | Default template |
+
+## Develop this repo
 
 ```bash
 bun install
-bun run typecheck   # tsc across all workspaces
-bun run lint        # oxlint
-bun test            # rpc round-trip + vite plugin transform tests
+bun test
+bun run typecheck
+bun run lint
 
-# run the example app
-cd examples/basic
-bun run dev         # vite HMR + electrobun
+# run the example
+cd examples/basic && bun run dev
+
+# scaffold against local packages
+bun packages/create-electro-start/src/index.ts /tmp/demo --local --yes --force
 ```
+
+CI (GitHub Actions) runs typecheck, lint, tests, and `pack:check` on every push/PR to `main`.
+
+## License
+
+[MIT](LICENSE)

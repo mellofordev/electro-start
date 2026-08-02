@@ -6,7 +6,7 @@
 import { readdir, rm, stat } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { examplesRoot } from "./scaffold.ts";
+import { examplesRoot, publishedFrameworkVersion } from "./scaffold.ts";
 
 const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const templatesDir = resolve(packageRoot, "templates");
@@ -35,11 +35,12 @@ async function copyDir(src: string, dest: string): Promise<void> {
     if (!entry.isFile()) continue;
 
     if (entry.name === "package.json") {
+      const version = publishedFrameworkVersion();
       const pkg = await Bun.file(from).json();
       for (const bag of [pkg.dependencies, pkg.devDependencies]) {
         if (!bag) continue;
         for (const [key, value] of Object.entries(bag)) {
-          if (value === "workspace:*") bag[key] = "^0.0.1";
+          if (value === "workspace:*") bag[key] = version;
         }
       }
       await Bun.write(to, `${JSON.stringify(pkg, null, 2)}\n`);

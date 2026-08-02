@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { readdir, stat } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -28,6 +29,16 @@ const SCAFFOLD_TSCONFIG_PATH = resolve(
   dirname(fileURLToPath(import.meta.url)),
   "scaffold-tsconfig.json",
 );
+
+const PACKAGE_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+
+/** Framework version written into scaffolded apps (matches this CLI release). */
+export function publishedFrameworkVersion(): string {
+  const pkg = JSON.parse(
+    readFileSync(resolve(PACKAGE_ROOT, "package.json"), "utf8"),
+  ) as { version: string };
+  return pkg.version;
+}
 
 const SKIP_DIR_NAMES = new Set([
   "node_modules",
@@ -206,8 +217,9 @@ function applyLocalDeps(
   return `${JSON.stringify(pkg, null, 2)}\n`;
 }
 
-/** Turn monorepo workspace: deps into publishable semver ranges. */
+/** Turn monorepo workspace: deps into publishable version pins. */
 function applyPublishedDeps(packageJson: string): string {
+  const version = publishedFrameworkVersion();
   const pkg = JSON.parse(packageJson) as {
     dependencies?: Record<string, string>;
     devDependencies?: Record<string, string>;
@@ -216,7 +228,7 @@ function applyPublishedDeps(packageJson: string): string {
     if (!bag) continue;
     for (const [key, value] of Object.entries(bag)) {
       if (value === "workspace:*") {
-        bag[key] = "^0.0.1";
+        bag[key] = version;
       }
     }
   }

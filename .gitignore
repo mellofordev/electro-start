@@ -39,3 +39,7 @@ AGENTS.md
 .claude
 
 test-cli
+
+# Generated for npm publish (create-electro-start prepack)
+packages/create-electro-start/templates
+packages/*/LICENSE

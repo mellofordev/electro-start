@@ -2,11 +2,17 @@
   "name": "electro-start-monorepo",
   "type": "module",
   "private": true,
-  "workspaces": ["packages/*", "examples/*"],
+  "workspaces": [
+    "packages/*",
+    "examples/*"
+  ],
   "scripts": {
     "test": "bun test tests",
     "typecheck": "bun run --filter '*' typecheck",
-    "lint": "oxlint ."
+    "lint": "oxlint .",
+    "sync-templates": "bun run --filter create-electro-start sync-templates",
+    "pack:check": "bun run sync-templates && (cd packages/electro-start && bun pm pack) && (cd packages/vite-plugin && bun pm pack) && (cd packages/create-electro-start && bun pm pack) && tar -tzf packages/create-electro-start/create-electro-start-*.tgz | grep -q templates/basic && echo pack:check\\ ok",
+    "publish:alpha": "bash scripts/publish-alpha.sh"
   },
   "devDependencies": {
     "@types/bun": "latest",

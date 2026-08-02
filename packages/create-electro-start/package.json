@@ -1,22 +1,54 @@
 {
   "name": "create-electro-start",
-  "version": "0.0.1",
+  "version": "0.0.1-alpha.0",
   "description": "Scaffold an electro-start desktop app (Electrobun + Vite + React)",
   "type": "module",
+  "license": "MIT",
+  "author": "mellofordev",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mellofordev/electro-start.git",
+    "directory": "packages/create-electro-start"
+  },
+  "homepage": "https://github.com/mellofordev/electro-start/tree/master/packages/create-electro-start#readme",
+  "bugs": {
+    "url": "https://github.com/mellofordev/electro-start/issues"
+  },
+  "keywords": [
+    "create",
+    "scaffold",
+    "electro-start",
+    "electrobun",
+    "desktop",
+    "bun"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "tag": "alpha"
+  },
   "bin": {
     "create-electro-start": "./src/index.ts"
   },
-  "files": ["src", "templates"],
+  "files": [
+    "src",
+    "templates",
+    "LICENSE",
+    "README.md"
+  ],
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",
     "sync-templates": "bun ./src/sync-templates.ts",
-    "prepublishOnly": "bun run sync-templates"
+    "prepack": "bun run sync-templates && cp ../../LICENSE .",
+    "prepublishOnly": "bun run sync-templates && cp ../../LICENSE ."
+  },
+  "dependencies": {
+    "@clack/prompts": "^1.7.0"
   },
   "devDependencies": {
     "@types/bun": "latest",
     "typescript": "^5.7.2"
   },
-  "dependencies": {
-    "@clack/prompts": "^1.7.0"
+  "engines": {
+    "bun": ">=1.1.0"
   }
 }

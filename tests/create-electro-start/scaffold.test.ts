@@ -79,8 +79,10 @@ test("scaffold writes a complete project from examples/basic", async () => {
   expect(pkg.name).toBe("demo-app");
   expect(pkg.scripts.dev).toContain("hmr");
   expect(pkg.scripts.dev).toContain("electrobun dev");
-  expect(pkg.dependencies["electro-start"]).toBe("^0.0.1");
-  expect(pkg.devDependencies["@electro-start/vite-plugin"]).toBe("^0.0.1");
+  expect(pkg.dependencies["electro-start"]).toBe("0.0.1-alpha.0");
+  expect(pkg.devDependencies["@electro-start/vite-plugin"]).toBe(
+    "0.0.1-alpha.0",
+  );
   expect(pkg.dependencies["@tanstack/react-router"]).toBeDefined();
 
   const electrobun = await Bun.file(
