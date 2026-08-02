@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
-import { deriveMainFnId } from "./id.ts";
-import { injectMainFnIds } from "./runtime/discovery.ts";
+import { deriveMainFnId } from "../../packages/electro-start/src/id.ts";
+import { injectMainFnIds } from "../../packages/electro-start/src/runtime/discovery.ts";
 
 test("deriveMainFnId normalizes relative paths", () => {
   expect(

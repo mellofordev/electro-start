@@ -13,7 +13,7 @@ src/
 
 ```bash
 bun install
-bun run dev:hmr
+bun run dev
 ```
 
 UI was initialized with:

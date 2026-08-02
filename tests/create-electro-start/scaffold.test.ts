@@ -7,15 +7,18 @@ import {
   defaultNameFromDir,
   parseArgs,
   toAppIdentifier,
-} from "./args.ts";
+} from "../../packages/create-electro-start/src/args.ts";
 import {
   listTemplateIds,
   resolveLocalPackagePaths,
   resolveTemplateRoot,
   scaffoldProject,
-} from "./scaffold.ts";
+} from "../../packages/create-electro-start/src/scaffold.ts";
 
-const packageRoot = resolve(fileURLToPath(import.meta.url), "../..");
+const packageRoot = resolve(
+  fileURLToPath(import.meta.url),
+  "../../../packages/create-electro-start",
+);
 const tempDirs: string[] = [];
 
 afterAll(async () => {
@@ -74,7 +77,8 @@ test("scaffold writes a complete project from examples/basic", async () => {
 
   const pkg = await Bun.file(join(targetDir, "package.json")).json();
   expect(pkg.name).toBe("demo-app");
-  expect(pkg.scripts["dev:hmr"]).toContain("hmr");
+  expect(pkg.scripts.dev).toContain("hmr");
+  expect(pkg.scripts.dev).toContain("electrobun dev");
   expect(pkg.dependencies["electro-start"]).toBe("^0.0.1");
   expect(pkg.devDependencies["@electro-start/vite-plugin"]).toBe("^0.0.1");
   expect(pkg.dependencies["@tanstack/react-router"]).toBeDefined();
@@ -113,6 +117,12 @@ test("scaffold writes a complete project from examples/basic", async () => {
     await Bun.file(join(targetDir, "src/routeTree.gen.ts")).exists(),
   ).toBe(true);
   expect(
+    await Bun.file(join(targetDir, "src/components/app-sidebar.tsx")).exists(),
+  ).toBe(true);
+  expect(
+    await Bun.file(join(targetDir, "src/components/ui/sidebar.tsx")).exists(),
+  ).toBe(true);
+  expect(
     await Bun.file(join(targetDir, "src/components/ui/button.tsx")).exists(),
   ).toBe(true);
   expect(
@@ -137,6 +147,7 @@ test("scaffold writes a complete project from examples/basic", async () => {
 
   const bunEntry = await Bun.file(join(targetDir, "src/main.ts")).text();
   expect(bunEntry).toContain(`title: "demo-app"`);
+  expect(bunEntry).toContain(`titleBarStyle: "hiddenInset"`);
 
   const todosPage = await Bun.file(
     join(targetDir, "src/app/todos.tsx"),

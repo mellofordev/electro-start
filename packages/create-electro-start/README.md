@@ -42,10 +42,10 @@ bun packages/create-electro-start/src/index.ts
 # non-interactive
 bun packages/create-electro-start/src/index.ts /tmp/demo-app --local --yes --force
 cd /tmp/demo-app
-bun run dev:hmr
+bun run dev
 ```
 
-The CLI warms Electrobun platform binaries after install so the first `bun run start` / `dev:hmr` is faster. The first Electrobun run on a machine may still download ~30MB of native cores.
+The CLI warms Electrobun platform binaries after install so the first `bun run start` / `dev` is faster. The first Electrobun run on a machine may still download ~30MB of native cores.
 
 ### Adding a template
 

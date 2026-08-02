@@ -1,4 +1,12 @@
-import { Link, Outlet, createRootRoute } from "@tanstack/react-router";
+import { Outlet, createRootRoute } from "@tanstack/react-router";
+import { AppSidebar } from "@/components/app-sidebar";
+import {
+	SidebarInset,
+	SidebarProvider,
+	SidebarTrigger,
+} from "@/components/ui/sidebar";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { Separator } from "@/components/ui/separator";
 
 export const Route = createRootRoute({
 	component: RootLayout,
@@ -6,31 +14,23 @@ export const Route = createRootRoute({
 
 function RootLayout() {
 	return (
-		<div className="flex min-h-svh flex-col">
-			<header className="border-b bg-card/80 backdrop-blur">
-				<div className="mx-auto flex h-12 max-w-2xl items-center justify-between px-6">
-					<Link to="/" className="text-sm font-medium tracking-tight">
-						Electro Start
-					</Link>
-					<nav className="flex items-center gap-4 text-sm text-muted-foreground">
-						<Link
-							to="/"
-							className="hover:text-foreground [&.active]:text-foreground"
-						>
-							Home
-						</Link>
-						<Link
-							to="/todos"
-							className="hover:text-foreground [&.active]:text-foreground"
-						>
-							Todos
-						</Link>
-					</nav>
-				</div>
-			</header>
-			<main className="mx-auto w-full max-w-2xl flex-1 px-6 py-16">
-				<Outlet />
-			</main>
-		</div>
+		<TooltipProvider>
+			<SidebarProvider>
+				<AppSidebar />
+				<SidebarInset>
+					<header className="app-region-drag electrobun-webkit-app-region-drag flex h-12 shrink-0 items-center gap-2 border-b px-3">
+						<SidebarTrigger className="app-region-no-drag electrobun-webkit-app-region-no-drag" />
+						<Separator
+							orientation="vertical"
+							className="app-region-no-drag electrobun-webkit-app-region-no-drag mr-1 data-[orientation=vertical]:h-4"
+						/>
+						<div className="flex-1" aria-hidden />
+					</header>
+					<main className="mx-auto w-full max-w-2xl flex-1 px-8 py-10">
+						<Outlet />
+					</main>
+				</SidebarInset>
+			</SidebarProvider>
+		</TooltipProvider>
 	);
 }

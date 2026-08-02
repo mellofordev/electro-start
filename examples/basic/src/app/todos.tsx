@@ -10,6 +10,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 
 export const Route = createFileRoute("/todos")({
 	component: TodosPage,
@@ -50,35 +51,32 @@ function TodosPage() {
 	}
 
 	return (
-		<div className="mx-auto max-w-md space-y-6">
+		<div className="max-w-md space-y-6">
 			<div>
 				<h1 className="text-2xl font-semibold tracking-tight">Todos</h1>
-				<p className="mt-1 text-sm text-muted-foreground">
+				<p className="mt-1.5 text-sm text-muted-foreground">
 					State lives in the Bun process.
 				</p>
 			</div>
 
-			<Card className="shadow-sm">
-				<CardHeader className="pb-4">
-					<CardTitle className="text-base">New todo</CardTitle>
+			<Card>
+				<CardHeader>
+					<CardTitle>New todo</CardTitle>
 					<CardDescription>Calls `addTodo` via RPC.</CardDescription>
 				</CardHeader>
 				<CardContent className="space-y-4">
 					<form onSubmit={onSubmit} className="flex gap-2">
-						<input
+						<Input
 							value={title}
 							onChange={(e) => setTitle(e.target.value)}
 							placeholder="Buy milk"
-							className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
 						/>
 						<Button type="submit">Add</Button>
 					</form>
 
-					{error && (
-						<p className="text-sm text-destructive">{error}</p>
-					)}
+					{error && <p className="text-sm text-destructive">{error}</p>}
 
-					<ul className="divide-y rounded-md border">
+					<ul className="divide-y rounded-lg border border-border">
 						{todos.map((todo) => (
 							<li key={todo.id}>
 								<button

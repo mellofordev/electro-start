@@ -1,6 +1,6 @@
 import { resolve } from "node:path";
 import { test, expect } from "bun:test";
-import { electroStart } from "./index.ts";
+import { electroStart } from "../../packages/vite-plugin/src/index.ts";
 
 type TransformFn = (
   this: { error: (msg: string) => never },

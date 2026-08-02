@@ -1,7 +1,10 @@
 import { test, expect } from "bun:test";
-import { createMainFn, MainFnError } from "./index.ts";
-import { createClientStub, installDispatcher } from "./client/stub.ts";
-import { handleMainFnCall } from "./runtime/handler.ts";
+import { createMainFn, MainFnError } from "../../packages/electro-start/src/index.ts";
+import {
+  createClientStub,
+  installDispatcher,
+} from "../../packages/electro-start/src/client/stub.ts";
+import { handleMainFnCall } from "../../packages/electro-start/src/runtime/handler.ts";
 
 // Route stub calls straight into the real bun-side handler: this covers the
 // full serialize -> dispatch -> execute -> envelope -> deserialize path,

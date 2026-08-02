@@ -7,7 +7,7 @@ A meta-framework for building desktop apps with [Electrobun](https://blackboard.
 ```bash
 bunx create-electro-start my-app
 cd my-app
-bun run dev:hmr
+bun run dev
 ```
 
 From this monorepo (before packages are published), use the local CLI:
@@ -15,7 +15,7 @@ From this monorepo (before packages are published), use the local CLI:
 ```bash
 bun packages/create-electro-start/src/index.ts my-app --local
 cd my-app
-bun run dev:hmr
+bun run dev
 ```
 
 See [`packages/create-electro-start`](packages/create-electro-start) for flags (`--skip-install`, `--force`, `--name`).
@@ -136,5 +136,5 @@ bun test            # rpc round-trip + vite plugin transform tests
 
 # run the example app
 cd examples/basic
-bun run dev:hmr     # vite dev server + electrobun, with HMR
+bun run dev         # vite HMR + electrobun
 ```

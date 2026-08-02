@@ -116,7 +116,7 @@ export async function main(argv = Bun.argv.slice(2)): Promise<number> {
       [
         options.dir === "." ? null : `cd ${options.dir}`,
         options.skipInstall ? "bun install" : null,
-        "bun run dev:hmr",
+        "bun run dev",
       ]
         .filter(Boolean)
         .join("\n"),

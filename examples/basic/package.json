@@ -3,10 +3,9 @@
 	"version": "1.0.0",
 	"description": "Basic electro-start starter: Expo-style src, shadcn/ui (Base UI + nova), TanStack Router",
 	"scripts": {
-		"start": "bun --bun vite build && electrobun dev",
-		"dev": "bun --bun vite build && electrobun dev --watch",
-		"dev:hmr": "bun --bun vite build && concurrently -k \"bun run hmr\" \"electrobun dev\"",
+		"dev": "bun --bun vite build && concurrently -k \"bun run hmr\" \"electrobun dev\"",
 		"hmr": "bun --bun vite --port 5173",
+		"start": "bun --bun vite build && electrobun dev",
 		"build:canary": "bun --bun vite build && electrobun build --env=canary",
 		"typecheck": "tsc -p tsconfig.json"
 	},

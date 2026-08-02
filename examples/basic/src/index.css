@@ -94,3 +94,14 @@
 		@apply min-h-svh bg-background font-sans text-foreground antialiased;
 	}
 }
+
+/* Electrobun window drag regions (custom titlebar) */
+.app-region-drag {
+	-webkit-app-region: drag;
+	app-region: drag;
+}
+
+.app-region-no-drag {
+	-webkit-app-region: no-drag;
+	app-region: no-drag;
+}

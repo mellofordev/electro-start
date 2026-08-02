@@ -19,7 +19,9 @@ export {
   listDiscoveredMainFnModules,
 } from "./discovery.ts";
 
-type WindowOptions = Omit<Partial<WindowOptionsType>, "url" | "rpc">;
+type WindowOptions = Omit<Partial<WindowOptionsType>, "url" | "rpc" | "frame"> & {
+  frame?: Partial<WindowOptionsType["frame"]>;
+};
 
 export interface StartAppOptions {
   /**
@@ -106,8 +108,19 @@ export async function startApp(
   const rpc = createMainFnRPC({ maxRequestTime: options.maxRequestTime });
   const url = await resolveViewUrl(options.view ?? "app", options.devServer);
 
+  const { frame, ...windowRest } = options.window ?? {};
   const window = new BrowserWindow({
-    ...options.window,
+    ...windowRest,
+    ...(frame
+      ? {
+          frame: {
+            x: frame.x ?? 0,
+            y: frame.y ?? 0,
+            width: frame.width ?? 800,
+            height: frame.height ?? 600,
+          },
+        }
+      : {}),
     url,
     rpc,
   });
