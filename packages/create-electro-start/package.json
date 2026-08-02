@@ -6,21 +6,17 @@
   "bin": {
     "create-electro-start": "./src/index.ts"
   },
-  "files": ["src", "template"],
+  "files": ["src", "templates"],
   "scripts": {
-    "typecheck": "tsc -p tsconfig.json && tsc -p template/tsconfig.json"
+    "typecheck": "tsc -p tsconfig.json",
+    "sync-templates": "bun ./src/sync-templates.ts",
+    "prepublishOnly": "bun run sync-templates"
   },
   "devDependencies": {
-    "@electro-start/vite-plugin": "workspace:*",
     "@types/bun": "latest",
-    "@types/react": "^18.3.12",
-    "@types/react-dom": "^18.3.1",
-    "@vitejs/plugin-react": "^4.3.4",
-    "electro-start": "workspace:*",
-    "electrobun": "1.18.1",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "typescript": "^5.7.2",
-    "vite": "^6.0.3"
+    "typescript": "^5.7.2"
+  },
+  "dependencies": {
+    "@clack/prompts": "^1.7.0"
   }
 }

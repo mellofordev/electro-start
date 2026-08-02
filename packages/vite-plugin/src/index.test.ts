@@ -1,3 +1,4 @@
+import { resolve } from "node:path";
 import { test, expect } from "bun:test";
 import { electroStart } from "./index.ts";
 
@@ -7,8 +8,12 @@ type TransformFn = (
   id: string,
 ) => { code: string } | null;
 
-function runTransform(code: string, id = "/app/src/mainview/todos.ts") {
-  const plugin = electroStart({ root: "/app" });
+function runTransform(
+  code: string,
+  id = "/project/src/actions/todos.ts",
+  root = "/project/src/actions",
+) {
+  const plugin = electroStart({ root });
   const transform = plugin.transform as unknown as TransformFn;
   return transform.call(
     {
@@ -38,11 +43,9 @@ test("compiles main-fn exports to client stubs", () => {
     `import { createClientStub } from "electro-start/client";`,
   );
   expect(out?.code).toContain(
-    `export const listTodos = /* @__PURE__ */ createClientStub("src/mainview/todos.ts:listTodos");`,
+    `export const listTodos = /* @__PURE__ */ createClientStub("todos.ts:listTodos");`,
   );
-  expect(out?.code).toContain(
-    `createClientStub("src/mainview/todos.ts:addTodo")`,
-  );
+  expect(out?.code).toContain(`createClientStub("todos.ts:addTodo")`);
   expect(out?.code).not.toContain("bun:sqlite");
   expect(out?.code).not.toContain("secret");
 });
@@ -51,9 +54,19 @@ test("detects main fns without a special filename", () => {
   expect(
     runTransform(
       `export const x = createMainFn().handler(async () => 1);`,
-      "/app/src/features/arbitrary.ts",
+      "/project/src/actions/features/arbitrary.ts",
     )?.code,
-  ).toContain(`createClientStub("src/features/arbitrary.ts:x")`);
+  ).toContain(`createClientStub("features/arbitrary.ts:x")`);
+});
+
+test("resolves relative root like electroStartBun so stub ids match", () => {
+  const absRoot = resolve(process.cwd(), "src/actions");
+  const out = runTransform(
+    `export const listTodos = createMainFn().handler(async () => []);`,
+    `${absRoot}/todos.ts`,
+    "src/actions",
+  );
+  expect(out?.code).toContain(`createClientStub("todos.ts:listTodos")`);
 });
 
 test("rejects non-mainFn value exports", () => {

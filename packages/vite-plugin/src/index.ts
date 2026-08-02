@@ -13,6 +13,7 @@
  *   export const listTodos = createClientStub("todos.list");
  */
 
+import { isAbsolute, resolve } from "node:path";
 import type { Plugin } from "vite";
 import { parseSync } from "oxc-parser";
 import { deriveMainFnId } from "electro-start/id";
@@ -22,7 +23,11 @@ export interface ElectroStartPluginOptions {
   include?: RegExp;
   /** Exclude files even when `include` matches. */
   exclude?: RegExp;
-  /** Root used when deriving ids. Defaults to Vite's resolved root. */
+  /**
+   * Root used when deriving ids. Relative paths resolve from `process.cwd()`
+   * (same as `electroStartBun`) so client stubs match Bun registrations.
+   * Defaults to Vite's resolved root.
+   */
   root?: string;
 }
 
@@ -213,10 +218,19 @@ function generateStubModule(mainFns: MainFnExport[]): string {
   return `${lines.join("\n")}\n`;
 }
 
+function resolveIdRoot(
+  configured: string | undefined,
+  fallback: string,
+): string {
+  const value = configured ?? fallback;
+  const absolute = isAbsolute(value) ? value : resolve(process.cwd(), value);
+  return absolute.replace(/[\\/]+$/, "");
+}
+
 export function electroStart(options: ElectroStartPluginOptions = {}): Plugin {
   const include = options.include ?? DEFAULT_INCLUDE;
   const exclude = options.exclude ?? DEFAULT_EXCLUDE;
-  let root = options.root ?? process.cwd();
+  let root = resolveIdRoot(options.root, process.cwd());
 
   return {
     name: "electro-start",
@@ -224,7 +238,7 @@ export function electroStart(options: ElectroStartPluginOptions = {}): Plugin {
     enforce: "pre",
 
     configResolved(config) {
-      root = options.root ?? config.root;
+      root = resolveIdRoot(options.root, config.root);
     },
 
     transform(code, id) {
@@ -251,7 +265,7 @@ export function electroStart(options: ElectroStartPluginOptions = {}): Plugin {
 
       return {
         code: generateStubModule(mainFns),
-        map: { mappings: "" },
+        map: null,
       };
     },
   };

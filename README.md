@@ -23,7 +23,7 @@ See [`packages/create-electro-start`](packages/create-electro-start) for flags (
 The core idea is **main fns**: like server functions, but the "server" is the Bun main process. Define a function once, import it from your UI, and call it like a local async function — it always executes in the main process, with full access to Bun APIs (`bun:sqlite`, `Bun.file`, the filesystem, secrets).
 
 ```ts
-// src/mainview/todos.ts — colocated with your UI
+// src/actions/todos.ts — Bun main-process RPC
 import { createMainFn } from "electro-start";
 
 export const listTodos = createMainFn().handler(async () => {
@@ -38,8 +38,8 @@ export const addTodo = createMainFn()
 ```
 
 ```tsx
-// src/mainview/App.tsx — runs in the webview
-import { addTodo, listTodos } from "./todos";
+// src/app/todos.tsx — route UI in the webview
+import { addTodo, listTodos } from "@/actions/todos";
 
 const todos = await listTodos();                    // result inferred
 const todo = await addTodo({ data: "Buy milk" });  // input + result inferred
@@ -60,13 +60,17 @@ Errors thrown in a main fn arrive in the webview as `MainFnError` with `name`, `
 ```
 my-app/
 ├── electrobun.config.ts
-├── vite.config.ts          # plugins: [electroStart(), react()]
+├── vite.config.ts
 └── src/
-    ├── bun/index.ts        # main process entry: startApp()
-    └── mainview/           # React UI + colocated main-fn modules
-        ├── App.tsx
-        └── todos.ts        # createMainFn builders
+    ├── main.ts             # Bun entry: startApp()
+    ├── main.tsx            # React entry + RouterProvider
+    ├── app/                # file-based routes (Expo-style, no nested routes/)
+    ├── actions/            # createMainFn RPC (Bun)
+    ├── components/         # UI components
+    └── lib/
 ```
+
+Templates are maintained under `examples/` (default: `basic`) and consumed by `create-electro-start`.
 
 Main process entry:
 
@@ -87,17 +91,24 @@ import { electroStartBun } from "electro-start/bun-plugin";
 
 export default {
   build: {
-    bun: { plugins: [electroStartBun()] },
-    // views/copy config...
+    bun: {
+      entrypoint: "src/main.ts",
+      // Launcher loads app/bun/index.js (not main.js).
+      naming: "index.js",
+      plugins: [electroStartBun()],
+    },
+    copy: {
+      "dist/index.html": "views/app/index.html",
+      "dist/assets": "views/app/assets",
+    },
   },
 } satisfies ElectrobunConfig;
 ```
 
-The Bun plugin discovers `<cwd>/src/mainview` by default, injects stable ids,
+The Bun plugin discovers `<cwd>/src/actions` by default, injects stable ids,
 and bundles the implementations into packaged apps. `startApp()` also scans
-that root when running directly without a build. Set `root` on both when your
-source lives elsewhere. A module containing main fns may export main fns and
-types; keep React components in a sibling module.
+that root when running directly without a build. Keep the Vite plugin’s
+`electroStart({ root: "src/actions" })` in sync so client stub ids match.
 
 Webview entry:
 
@@ -113,7 +124,7 @@ initElectroStart();
 | [`packages/electro-start`](packages/electro-start) | core: createMainFn, runtime, client, query helpers |
 | [`packages/vite-plugin`](packages/vite-plugin) | strips main-fn modules from the webview bundle |
 | [`packages/create-electro-start`](packages/create-electro-start) | CLI: `bunx create-electro-start` project scaffold |
-| [`examples/app`](examples/app) | example: todos + system info over the bridge |
+| [`examples/basic`](examples/basic) | default starter: Expo-style src layout + todos actions |
 
 ## Development
 
@@ -124,6 +135,6 @@ bun run lint        # oxlint
 bun test            # rpc round-trip + vite plugin transform tests
 
 # run the example app
-cd examples/app
+cd examples/basic
 bun run dev:hmr     # vite dev server + electrobun, with HMR
 ```

@@ -1,0 +1,6 @@
+{
+  "description": "Basic starter with shadcn (Base UI + nova), TanStack Router",
+  "packageName": "electro-start-example",
+  "identifier": "example.electrostart.dev",
+  "displayName": "Electro Start"
+}

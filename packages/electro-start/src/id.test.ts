@@ -5,18 +5,25 @@ import { injectMainFnIds } from "./runtime/discovery.ts";
 test("deriveMainFnId normalizes relative paths", () => {
   expect(
     deriveMainFnId(
-      "/app/src/mainview/todos.ts",
+      "/project/src/actions/todos.ts",
       "listTodos",
-      "/app",
+      "/project/src/actions",
     ),
-  ).toBe("src/mainview/todos.ts:listTodos");
+  ).toBe("todos.ts:listTodos");
   expect(
     deriveMainFnId(
-      "C:\\app\\src\\mainview\\todos.ts",
+      "C:\\project\\src\\actions\\todos.ts",
       "listTodos",
-      "C:\\app",
+      "C:\\project\\src\\actions",
     ),
-  ).toBe("src/mainview/todos.ts:listTodos");
+  ).toBe("todos.ts:listTodos");
+  expect(
+    deriveMainFnId(
+      "/Users/me/app/src/actions/todos.ts",
+      "listTodos",
+      "src/actions",
+    ),
+  ).toBe("todos.ts:listTodos");
 });
 
 test("Bun loader injects derived ids and preserves overrides", () => {
@@ -26,12 +33,12 @@ test("Bun loader injects derived ids and preserves overrides", () => {
   `;
   const transformed = injectMainFnIds(
     source,
-    "/app/src/mainview/todos.ts",
-    "/app",
+    "/project/src/actions/todos.ts",
+    "/project/src/actions",
   );
 
   expect(transformed).toContain(
-    `createMainFn({ id: "src/mainview/todos.ts:listTodos" })`,
+    `createMainFn({ id: "todos.ts:listTodos" })`,
   );
   expect(transformed).toContain(`createMainFn({ id: "custom.id" })`);
 });

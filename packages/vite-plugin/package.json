@@ -6,9 +6,14 @@
   "exports": { ".": "./src/index.ts" },
   "scripts": { "typecheck": "tsc -p tsconfig.json" },
   "dependencies": {
-    "electro-start": "workspace:*",
     "oxc-parser": "^0.77.0"
   },
-  "peerDependencies": { "vite": ">=5" },
-  "devDependencies": { "vite": "^6.0.0" }
+  "peerDependencies": {
+    "electro-start": ">=0.0.1",
+    "vite": ">=5"
+  },
+  "devDependencies": {
+    "electro-start": "workspace:*",
+    "vite": "6.4.3"
+  }
 }

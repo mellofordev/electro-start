@@ -1,10 +1,13 @@
 export interface CliArgs {
-  dir: string;
-  name: string;
+  dir?: string;
+  name?: string;
+  template?: string;
   skipInstall: boolean;
   force: boolean;
   local: boolean;
+  yes: boolean;
   help: boolean;
+  listTemplates: boolean;
 }
 
 function readFlagValue(argv: string[], index: number, flag: string): string {
@@ -15,19 +18,26 @@ function readFlagValue(argv: string[], index: number, flag: string): string {
   return next;
 }
 
-/** Parse create-electro-start argv (Bun/node style, no CLI framework). */
+/** Parse create-electro-start argv. Missing fields are filled by prompts. */
 export function parseArgs(argv: string[]): CliArgs {
   let dir: string | undefined;
   let name: string | undefined;
+  let template: string | undefined;
   let skipInstall = false;
   let force = false;
   let local = false;
+  let yes = false;
   let help = false;
+  let listTemplates = false;
 
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i]!;
     if (arg === "--help" || arg === "-h") {
       help = true;
+      continue;
+    }
+    if (arg === "--list-templates") {
+      listTemplates = true;
       continue;
     }
     if (arg === "--skip-install") {
@@ -42,6 +52,10 @@ export function parseArgs(argv: string[]): CliArgs {
       local = true;
       continue;
     }
+    if (arg === "--yes" || arg === "-y") {
+      yes = true;
+      continue;
+    }
     if (arg === "--name") {
       name = readFlagValue(argv, i, "--name");
       i++;
@@ -49,6 +63,15 @@ export function parseArgs(argv: string[]): CliArgs {
     }
     if (arg.startsWith("--name=")) {
       name = arg.slice("--name=".length);
+      continue;
+    }
+    if (arg === "--template") {
+      template = readFlagValue(argv, i, "--template");
+      i++;
+      continue;
+    }
+    if (arg.startsWith("--template=")) {
+      template = arg.slice("--template=".length);
       continue;
     }
     if (arg.startsWith("-")) {
@@ -60,35 +83,16 @@ export function parseArgs(argv: string[]): CliArgs {
     dir = arg;
   }
 
-  if (help) {
-    return {
-      dir: dir ?? ".",
-      name: name ?? "app",
-      skipInstall,
-      force,
-      local,
-      help,
-    };
-  }
-
-  if (!dir && !name) {
-    throw new Error(
-      "Missing project directory.\nUsage: create-electro-start <dir> [--name <name>] [--local] [--skip-install] [--force]",
-    );
-  }
-
-  const resolvedDir = dir ?? ".";
-  const resolvedName =
-    name ??
-    (resolvedDir === "." ? "app" : resolvedDir.replace(/[/\\]+$/, "").split(/[/\\]/).pop()!);
-
   return {
-    dir: resolvedDir,
-    name: resolvedName,
+    dir,
+    name,
+    template,
     skipInstall,
     force,
     local,
+    yes,
     help,
+    listTemplates,
   };
 }
 
@@ -102,4 +106,9 @@ export function toAppIdentifier(name: string): string {
     .replace(/-+/g, "-");
   const safe = slug.length > 0 ? slug : "app";
   return `dev.electrostart.${safe}`;
+}
+
+export function defaultNameFromDir(dir: string): string {
+  if (dir === "." || dir === "") return "app";
+  return dir.replace(/[/\\]+$/, "").split(/[/\\]/).pop() || "app";
 }

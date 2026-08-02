@@ -24,14 +24,14 @@ type WindowOptions = Omit<Partial<WindowOptionsType>, "url" | "rpc">;
 export interface StartAppOptions {
   /**
    * Source root scanned for createMainFn modules.
-   * @default "<cwd>/src/mainview"
+   * @default "<cwd>/src/actions"
    */
   root?: string;
   /** BrowserWindow options (title, frame, titleBarStyle, ...). */
   window?: WindowOptions;
   /**
    * The view to load, as configured in electrobun.config.ts.
-   * @default "mainview"
+   * @default "app"
    */
   view?: string;
   /**
@@ -64,7 +64,11 @@ async function resolveViewUrl(
 
   const devUrl = devServer?.url ?? `http://localhost:${devServer?.port ?? 5173}`;
   try {
-    await fetch(devUrl, { method: "HEAD" });
+    // Bound the probe so a stuck localhost fetch can't block window creation.
+    await fetch(devUrl, {
+      method: "HEAD",
+      signal: AbortSignal.timeout(750),
+    });
     console.log(`[electro-start] HMR: loading ${devUrl}`);
     return devUrl;
   } catch {
@@ -90,7 +94,7 @@ async function resolveViewUrl(
 export async function startApp(
   options: StartAppOptions = {},
 ): Promise<ElectroStartApp> {
-  const configuredRoot = options.root ?? `${process.cwd()}/src/mainview`;
+  const configuredRoot = options.root ?? `${process.cwd()}/src/actions`;
   const root = configuredRoot.startsWith("/")
     ? configuredRoot
     : `${process.cwd()}/${configuredRoot}`;
@@ -100,10 +104,7 @@ export async function startApp(
   if (!wasPrebundled) await discoverMainFnModules(root);
 
   const rpc = createMainFnRPC({ maxRequestTime: options.maxRequestTime });
-  const url = await resolveViewUrl(
-    options.view ?? "mainview",
-    options.devServer,
-  );
+  const url = await resolveViewUrl(options.view ?? "app", options.devServer);
 
   const window = new BrowserWindow({
     ...options.window,
