@@ -1,0 +1,36 @@
+{
+	"compilerOptions": {
+		"target": "ES2022",
+		"useDefineForClassFields": true,
+		"lib": ["ES2023", "DOM", "DOM.Iterable"],
+		"module": "ESNext",
+		"skipLibCheck": true,
+		"moduleResolution": "bundler",
+		"allowImportingTsExtensions": true,
+		"isolatedModules": true,
+		"moduleDetection": "force",
+		"noEmit": true,
+		"jsx": "react-jsx",
+		"strict": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"noFallthroughCasesInSwitch": true,
+		"types": ["bun", "vite/client"],
+		"paths": {
+			"electro-start": ["../../electro-start/src/index.ts"],
+			"electro-start/client": ["../../electro-start/src/client/index.ts"],
+			"electro-start/runtime": ["../../electro-start/src/runtime/index.ts"],
+			"electro-start/bun-plugin": ["../../electro-start/src/bun-plugin.ts"],
+			"electro-start/id": ["../../electro-start/src/id.ts"],
+			"electro-start/query": ["../../electro-start/src/query/index.ts"],
+			"@electro-start/vite-plugin": ["../../vite-plugin/src/index.ts"]
+		}
+	},
+	"include": [
+		"src/**/*.ts",
+		"src/**/*.tsx",
+		"vite.config.ts",
+		"electrobun.config.ts"
+	],
+	"exclude": ["node_modules", "dist", "build"]
+}

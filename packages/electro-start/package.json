@@ -1,0 +1,27 @@
+{
+  "name": "electro-start",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./bun-plugin": "./src/bun-plugin.ts",
+    "./id": "./src/id.ts",
+    "./runtime": "./src/runtime/index.ts",
+    "./client": "./src/client/index.ts",
+    "./query": "./src/query/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "peerDependencies": {
+    "electrobun": "*",
+    "@tanstack/react-query": ">=5"
+  },
+  "peerDependenciesMeta": {
+    "@tanstack/react-query": { "optional": true }
+  },
+  "dependencies": {
+    "superjson": "^2.2.0"
+  }
+}

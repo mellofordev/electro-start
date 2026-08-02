@@ -1,0 +1,16 @@
+{
+  "name": "electro-start-monorepo",
+  "type": "module",
+  "private": true,
+  "workspaces": ["packages/*", "examples/*"],
+  "scripts": {
+    "typecheck": "bun run --filter '*' typecheck",
+    "lint": "oxlint ."
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/three": "^0.185.1",
+    "oxlint": "^1.0.0",
+    "typescript": "^7.0.2"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "name": "@electro-start/vite-plugin",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": { ".": "./src/index.ts" },
+  "scripts": { "typecheck": "tsc -p tsconfig.json" },
+  "dependencies": {
+    "electro-start": "workspace:*",
+    "oxc-parser": "^0.77.0"
+  },
+  "peerDependencies": { "vite": ">=5" },
+  "devDependencies": { "vite": "^6.0.0" }
+}
